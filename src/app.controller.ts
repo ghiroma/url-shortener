@@ -1,4 +1,4 @@
-import { Logger, HttpException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import {
   Controller,
   Get,
@@ -13,6 +13,11 @@ import { ShortUrlDto } from './dto/shortUrl.dto';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) { }
+
+  @Get()
+  test() {
+    return { statusCode: 200 }
+  }
 
   @Redirect()
   @Get(':shortUrl')
