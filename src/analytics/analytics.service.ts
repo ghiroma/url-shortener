@@ -29,7 +29,7 @@ export class AnalyticsService {
       throw new NotFoundException(ERRORS.SHORT_URL_NOT_FOUND);
     }
 
-    const lastDay = DateTime.now().minus({ days: 1 }).toUTC().toISO();
+    const lastDay = DateTime.now().minus({ days: 1 }).toISO();
 
     const statement = `SELECT ${DB.TABLES.ANALYTICS.FIELDS.SHORT_URL} 
             FROM ${DB.TABLES.ANALYTICS.NAME}
