@@ -3,14 +3,14 @@ export default {
     URLS: {
       NAME: 'Urls',
       FIELDS: {
-        SHORT_URL: 'short_url',
+        HASH: 'hash',
         ORIGINAL_URL: 'original_url',
       },
     },
     ANALYTICS: {
       NAME: 'Analytics',
       FIELDS: {
-        SHORT_URL: 'short_url',
+        HASH: 'hash',
         TIMESTAMP: 'timestamp',
       },
     },

@@ -22,17 +22,17 @@ export class AppController {
   }
 
   @ApiOperation({
-		summary: 'Converts short url to full url'
+		summary: 'Converts hash to full url'
 	})
   @ApiParam({
-    name: 'shortUrl',
+    name: 'hash',
     required: true,
-    example: 'pepepe'
+    example: 'google'
   })
   @Redirect()
-  @Get(':shortUrl')
-  async redirect(@Param('shortUrl') shortUrl: string) {
-    const url = await this.appService.getRedirectUrl(shortUrl);
+  @Get(':hash')
+  async redirect(@Param('hash') hash: string) {
+    const url = await this.appService.getRedirectUrl(hash);
     return { statusCode: HttpStatus.FOUND, url: url };
   }
 

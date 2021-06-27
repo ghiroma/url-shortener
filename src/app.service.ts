@@ -27,51 +27,51 @@ export class AppService {
   async assignUrl(shortUrlRequest: ShortUrlDto): Promise<ShortUrlDto> {
     const existsOriginalUrl = await this.getByOriginalUrl(shortUrlRequest.originalUrl);
 
-    if (shortUrlRequest.shortUrl) {
-      if (existsOriginalUrl && existsOriginalUrl.shortUrl != shortUrlRequest.shortUrl) {
+    if (shortUrlRequest.hash) {
+      if (existsOriginalUrl && existsOriginalUrl.hash != shortUrlRequest.hash) {
         throw new NotFoundException(ERRORS.URL_ALREADY_SHORTENED);
-      } else if (existsOriginalUrl && existsOriginalUrl.shortUrl == shortUrlRequest.shortUrl) {
+      } else if (existsOriginalUrl && existsOriginalUrl.hash == shortUrlRequest.hash) {
         return existsOriginalUrl;
       }
 
-      const exists = await this.getByShortUrl(shortUrlRequest.shortUrl);
+      const exists = await this.getByHash(shortUrlRequest.hash);
 
       if (exists) {
-        throw new UnprocessableEntityException(ERRORS.SHORT_URL_ALREADY_IN_USE);
+        throw new UnprocessableEntityException(ERRORS.HASH_ALREADY_IN_USE);
       }
     } else if (existsOriginalUrl) {
       return existsOriginalUrl;
     } else {
       shortUrlRequest.originalUrl = shortUrlRequest.originalUrl.replace(/\/$/, "");
-      shortUrlRequest.shortUrl = await this.generateUrl();
+      shortUrlRequest.hash = await this.generateUrl();
     }
 
     const statement = `INSERT INTO ${DB.TABLES.URLS.NAME} VALUE
-     {'${DB.TABLES.URLS.FIELDS.SHORT_URL}' : '${shortUrlRequest.shortUrl}', 
+     {'${DB.TABLES.URLS.FIELDS.HASH}' : '${shortUrlRequest.hash}', 
      '${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}' : '${shortUrlRequest.originalUrl}' }`;
 
     await this.dynamoDb.executeStatement({ Statement: statement }).promise();
 
     return new ShortUrlDto(
       shortUrlRequest.originalUrl,
-      shortUrlRequest.shortUrl,
+      shortUrlRequest.hash,
     );
   }
 
-  async getRedirectUrl(shortUrl: string): Promise<string> {
-    const item = await this.getByShortUrl(shortUrl);
+  async getRedirectUrl(hash: string): Promise<string> {
+    const item = await this.getByHash(hash);
 
     if (!item) {
-      throw new NotFoundException(ERRORS.SHORT_URL_NOT_FOUND);
+      throw new NotFoundException(ERRORS.HASH_NOT_FOUND);
     }
 
-    this.eventEmitter.emit(EVENTS.URL_CLICKED, shortUrl);
+    this.eventEmitter.emit(EVENTS.URL_CLICKED, hash);
     return item.originalUrl;
   }
 
-  async getByShortUrl(shortUrl: string): Promise<ShortUrlDto | null> {
-    const statement = `SELECT ${DB.TABLES.URLS.FIELDS.SHORT_URL}, ${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}
-     FROM ${DB.TABLES.URLS.NAME} WHERE "${DB.TABLES.URLS.FIELDS.SHORT_URL}" = '${shortUrl}'`;
+  async getByHash(hash: string): Promise<ShortUrlDto | null> {
+    const statement = `SELECT ${DB.TABLES.URLS.FIELDS.HASH}, ${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}
+     FROM ${DB.TABLES.URLS.NAME} WHERE "${DB.TABLES.URLS.FIELDS.HASH}" = '${hash}'`;
     const response = await this.dynamoDb
       .executeStatement({ Statement: statement })
       .promise();
@@ -81,13 +81,13 @@ export class AppService {
     }
 
     const item = response.Items[0];
-    return new ShortUrlDto(item.original_url.S, item.short_url.S);
+    return new ShortUrlDto(item.original_url.S, item.hash.S);
   }
 
   private async getByOriginalUrl(
     originalUrl: string,
   ): Promise<ShortUrlDto | null> {
-    const statement = `SELECT ${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}, ${DB.TABLES.URLS.FIELDS.SHORT_URL} 
+    const statement = `SELECT ${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}, ${DB.TABLES.URLS.FIELDS.HASH} 
     FROM ${DB.TABLES.URLS.NAME} WHERE "${DB.TABLES.URLS.FIELDS.ORIGINAL_URL}" = '${originalUrl}'`;
 
     const response = await this.dynamoDb
@@ -99,17 +99,17 @@ export class AppService {
     }
 
     const item = response.Items[0];
-    return new ShortUrlDto(item.original_url.S, item.short_url.S);
+    return new ShortUrlDto(item.original_url.S, item.hash.S);
   }
 
   private async generateUrl(): Promise<string> {
-    let shortUrl: string;
+    let hash: string;
     let exists = null;
     let retry = 10;
 
     do {
-      shortUrl = nanoid(getRandomLength());
-      exists = await this.getByShortUrl(shortUrl);
+      hash = nanoid(getRandomLength());
+      exists = await this.getByHash(hash);
       retry--;
     } while (exists && retry > 0);
 
@@ -117,6 +117,6 @@ export class AppService {
       throw new InternalServerErrorException(ERRORS.CANNOT_GENERATE_URL);
     }
 
-    return shortUrl;
+    return hash;
   }
 }

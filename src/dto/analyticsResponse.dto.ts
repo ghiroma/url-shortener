@@ -1,14 +1,14 @@
 import { IsNotEmpty, IsNumber, IsPositive, MaxLength } from 'class-validator';
 
 export class AnalyticsResponseDTO {
-  constructor(shortUrl: string, clicks: number) {
-    this.shortUrl = shortUrl;
+  constructor(hash: string, clicks: number) {
+    this.hash = hash;
     this.clicks = clicks;
   }
 
   @IsNotEmpty()
   @MaxLength(6)
-  shortUrl: string;
+  hash: string;
 
   @IsPositive()
   @IsNumber()

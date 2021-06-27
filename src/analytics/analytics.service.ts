@@ -23,29 +23,29 @@ export class AnalyticsService {
   async getAnalytics(
     request: AnalyticsRequestDto,
   ): Promise<AnalyticsResponseDTO> {
-    const exists = await this.appService.getByShortUrl(request.shortUrl);
+    const exists = await this.appService.getByHash(request.hash);
 
     if (!exists) {
-      throw new NotFoundException(ERRORS.SHORT_URL_NOT_FOUND);
+      throw new NotFoundException(ERRORS.HASH_NOT_FOUND);
     }
 
     const lastDay = DateTime.now().minus({ days: 1 }).toISO();
 
-    const statement = `SELECT ${DB.TABLES.ANALYTICS.FIELDS.SHORT_URL} 
+    const statement = `SELECT ${DB.TABLES.ANALYTICS.FIELDS.HASH} 
             FROM ${DB.TABLES.ANALYTICS.NAME}
-            WHERE "${DB.TABLES.ANALYTICS.FIELDS.SHORT_URL}" = '${request.shortUrl}' 
+            WHERE "${DB.TABLES.ANALYTICS.FIELDS.HASH}" = '${request.hash}' 
             AND "${DB.TABLES.ANALYTICS.FIELDS.TIMESTAMP}" >= '${lastDay}'`;
 
     const response = await this.dynamoDb
       .executeStatement({ Statement: statement })
       .promise();
 
-    return new AnalyticsResponseDTO(request.shortUrl, response.Items.length);
+    return new AnalyticsResponseDTO(request.hash, response.Items.length);
   }
 
   async addEntry(shortUrl: string): Promise<void> {
     const statement = `INSERT INTO ${DB.TABLES.ANALYTICS.NAME}
-        VALUE { '${DB.TABLES.ANALYTICS.FIELDS.SHORT_URL}' : '${shortUrl}', 
+        VALUE { '${DB.TABLES.ANALYTICS.FIELDS.HASH}' : '${shortUrl}', 
         '${DB.TABLES.ANALYTICS.FIELDS.TIMESTAMP
       }': '${DateTime.utc().toISO()}' }`;
 

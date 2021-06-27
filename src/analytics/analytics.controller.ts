@@ -9,14 +9,14 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) { }
 
   @ApiOperation({
-    summary: 'Returns analytics information based on a shortened url'
+    summary: 'Returns analytics information based on a hash'
   })
   @ApiParam({
-    name: 'shortUrl',
+    name: 'hash',
     required: true,
-    example: 'pepepe'
+    example: 'google'
   })
-  @Get(':shortUrl')
+  @Get(':hash')
   async getAnalytics(
     @Param() request: AnalyticsRequestDto,
   ): Promise<AnalyticsResponseDTO> {

@@ -5,5 +5,5 @@ export class AnalyticsRequestDto {
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(6)
-  shortUrl: string;
+  hash: string;
 }

@@ -2,15 +2,15 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsUrl, MaxLength } from 'class-validator';
 
 export class ShortUrlDto {
-  constructor(originalUrl: string, shortUrl: string) {
+  constructor(originalUrl: string, hash: string) {
     this.originalUrl = originalUrl;
-    this.shortUrl = shortUrl;
+    this.hash = hash;
   }
 
   @ApiProperty()
   @IsOptional()
   @MaxLength(6)
-  shortUrl: string;
+  hash: string;
 
   @ApiProperty()
   @IsNotEmpty()
